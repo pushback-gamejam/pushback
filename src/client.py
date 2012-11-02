@@ -7,6 +7,7 @@ from direct.task import Task
 import sys
 
 import config
+from gameoutput import GameOutput
 
 class Client(ShowBase):
 
@@ -20,7 +21,34 @@ class Client(ShowBase):
         self.Connection = self.cManager.openTCPClientConnection(config.SERVER_IP, config.SERVER_PORT, 1)
         self.cReader.addConnection(self.Connection)
         taskMgr.add(self.readTask, "serverReaderPollTask", -39)
-        self.sendMsgAuth()
+
+        self.gameOutput = GameOutput()
+
+        def connect():
+            self.name = nameEntry.get()
+            if self.name != "":
+                self.sendMsgAuth()
+                loginButton["text"] = "Start!"
+                #loginButton["text_fg"] = (0.5, 0.5, 0.5, 1)
+                loginButton["command"] = self.sendCompleteSetup
+        loginButton = DirectButton(
+            text = "connect to server",
+            scale = 0.1,
+            command = connect,
+            frameSize = (-4.5, 4.5, -2, 2.5))
+
+        def setText(textEntered):
+	        nameEntry.setText(textEntered)
+        def clearText():
+	        nameEntry.enterText('')
+        nameEntry = DirectEntry(
+            scale = 0.1,
+            command=setText,
+            focusInCommand = clearText,
+            pos = (-0.5, 0, -0.5),
+            numLines = 1,
+            focus = 1,
+            relief = DGG.SUNKEN)
 
     ######################################################################################
 
@@ -64,7 +92,8 @@ class Client(ShowBase):
 
     def sendMsgAuth(self):
         pkg = PyDatagram()
-        pkg.addUint16(config.CL_MSG_AUTH) 
+        pkg.addUint16(config.CL_MSG_AUTH)
+        pkg.addString(self.name)
         self.send(pkg)
 
     ######################################################################################
@@ -95,8 +124,20 @@ class Client(ShowBase):
 
     ######################################################################################
 
+    def sendCompleteSetup(self):
+        pkg = PyDatagram()
+        pkg.addUint16(config.CL_MSG_COMPLETE_SETUP) 
+        self.send(pkg) 
+
+    ######################################################################################
+
     def send(self, pkg):
         self.cWriter.send(pkg, self.Connection) 
+
+    ######################################################################################
+
+    def handleStartGame(self, msgID, data):
+        self.gameOutput.start()
 
     ######################################################################################
 
@@ -109,7 +150,9 @@ client = Client()
 Handlers = { 
     config.SV_MSG_AUTH_RESPONSE  : client.msgAuthResponse, 
     config.SV_MSG_CHAT           : client.msgChat, 
-    config.SV_MSG_DISCONNECT_ACK : client.msgDisconnectAck, 
+    config.SV_MSG_DISCONNECT_ACK : client.msgDisconnectAck,
+    config.SV_MSG_START_GAME     : client.handleStartGame,
+    #config.SV_MSG_UPDATE_STATES  : client.msgUpdateStates
     } 
 
 run()
