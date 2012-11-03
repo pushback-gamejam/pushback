@@ -1,6 +1,11 @@
 from direct.actor.Actor import Actor
+from direct.showbase import Audio3DManager
+
+from panda3d.core import loadPrcFileData
+loadPrcFileData("", "audio-library-name p3fmod_audio")
 
 PUSHY_PATH = "resources/character/friday_2106/"
+PUSHY_AUDIO_PATH = "resources/audio/effects/"
 class Player(Actor):
     def __init__(self, name):
         Actor.__init__(self,PUSHY_PATH+"pushy.x",
@@ -18,7 +23,6 @@ class Player(Actor):
                         "walk":PUSHY_PATH+"pushy_walk.x"})
         self.name = name
         self.setName(name)
-
         self.health = 1.0
         self.setScale(0.2)
         self.setPlayRate(0.05, "fall")
@@ -41,6 +45,10 @@ class Player(Actor):
         self.movementSpeed = 25
         self.movementSpeedFlying = 50
         self.movementSpeedFalling = 50
+        
+        #audio3d = Audio3DManager.Audio3DManager(base.sfxManagerList[0], camera)
+        #mySound = audio3d.loadSfx('/audio/1.wav')
+        self.mySound = base.loader.loadSfx(PUSHY_AUDIO_PATH+"Game Jam - Action - Charging 04.ogg")
         
     def updateAnimation(self):
         if self.isMoving == True:
@@ -81,6 +89,8 @@ class Player(Actor):
     def charge(self):
         #self.setY(self, -3 * globalClock.getDt())
         if(self.isCharging == False):
+            self.mySound.play()
+            #audio3d.attachSoundToObject(mySound, self)
             self.isCharging = True
             self.loop("charge")
         else:
@@ -92,6 +102,10 @@ class Player(Actor):
             self.isCharging = False
             self.loop("charge_fly")
             self.isFlying = True
+            #self.mySound.stop()
+            #self.mySound = base.loader.loadSfx("4.ogg")
+            self.mySound.setTime(1.975)
+            self.mySound.play()
         if(self.isFlying == True):
             self.flyingTime = self.flyingTime-1
             self.setY(self, -self.movementSpeedFlying * globalClock.getDt())
@@ -111,6 +125,14 @@ class Player(Actor):
                 self.acStandup.play()
             else:
                 self.isFalling = False
+                
+    def setColor(self, color):
+        #if color == "blue":
+        skin = "skin_pushy_blue.jpg"
+        if color == "green":
+            skin = "skin_pushy_green.jpg"
+        myTexture = loader.loadTexture(PUSHY_PATH + skin)
+        self.setTexture(myTexture,1)
 
     def setStatus(self, status):
         """  """
@@ -118,7 +140,4 @@ class Player(Actor):
             self.stopAnimation()
         self.status = status
         self.updateAnimation()
-
-
-
         
