@@ -9,7 +9,7 @@ import sys
 
 from config import *
 from defines import *
-#from gameoutput import GameOutput
+from gameoutput import GameOutput
 
 class Client(DirectObject):
 
@@ -25,32 +25,39 @@ class Client(DirectObject):
         self.cReader.addConnection(self.Connection)
         self.showBase.taskMgr.add(self.readTask, "serverReaderPollTask", -39)
 
-        #self.gameOutput = GameOutput(self.showBase)
+        self.uiNode = aspect2d.attachNewNode("UI Node")
+        self.gameOutput = GameOutput("../resources/level/testlevel_new.x", self.showBase)
 
         def connect():
-            self.name = nameEntry.get()
+            self.name = self.nameEntry.get()
             if self.name != "":
                 self.sendMsgAuth()
-                loginButton["text"] = "Start!"
-                loginButton["command"] = self.sendCompleteSetup
-        loginButton = DirectButton(
-            text = "connect to server",
-            scale = 0.1,
-            command = connect,
-            frameSize = (-4.5, 4.5, -2, 2.5))
+                self.loginButton["text"] = "Start!"
+                self.loginButton["command"] = self.sendCompleteSetup
 
         def setText(textEntered):
-	        nameEntry.setText(textEntered)
+	        self.nameEntry.setText(textEntered)
         def clearText():
-	        nameEntry.enterText('')
-        nameEntry = DirectEntry(
+	        self.nameEntry.enterText('')
+
+        self.nameEntry =  DirectEntry(
             scale = 0.1,
             command = setText,
             focusInCommand = clearText,
             pos = (-0.5, 0, -0.5),
             numLines = 1,
             focus = 1,
-            relief = DGG.SUNKEN)
+            relief = DGG.SUNKEN) 
+
+        self.loginButton = DirectButton(
+            text = "connect to server",
+            scale = 0.1,
+            command = connect,
+            frameSize = (-4.5, 4.5, -2, 2.5))
+
+        self.loginButton.reparentTo(self.uiNode)
+        self.nameEntry.reparentTo(self.uiNode)
+
 
     ######################################################################################
 
@@ -171,11 +178,13 @@ class Client(DirectObject):
         self.accept("c-up", self.sendChargeCommand, [0]);
         self.accept("v-up", self.sendJumpCommand, [0]);
         
+
+        self.uiNode.hide()
         setup = []
         numberOfPlayers = data.getUint16()
         for i in range(0, numberOfPlayers):
             setup.append([data.getString(), Point3(data.getFloat32(), data.getFloat32(), data.getFloat32())])
-        #self.gameOutput.start(self.name, setup)
+        self.gameOutput.start(self.name, setup)
 
     def handleUpdatePositions(self, msgID, data):
         updates = []
@@ -185,8 +194,8 @@ class Client(DirectObject):
             updates.append([
                 data.getString(),
                 Point3(data.getFloat32(), data.getFloat32(), data.getFloat32()),
-                Point3(data.getFloat32(), data.getFloat32(), data.getFloat32())])
-        #self.gameOutput.setPlayerPositions(updates)
+                Vec3(data.getFloat32(), data.getFloat32(), data.getFloat32())])
+        self.gameOutput.setPlayerPositions(updates)
         for update in updates:
             print "%s: (%f / %f / %f)" % (update[0], update[1][0], update[1][1], update[1][2])
 
@@ -201,7 +210,7 @@ class Client(DirectObject):
                 "health" : data.getFloat32(),
                 "charge" : data.getUint8(),
                 "jump" : data.getUint8()})
-        #self.gameOutput.setPlayerStates(updates)
+        self.gameOutput.setPlayerStates(updates)
         for update in updates:
             print "%s: %d, %.2f, %d, %d" % (update["player"], update["status"], update["health"], update["charge"], update["jump"])
 
