@@ -190,7 +190,6 @@ class Server(DirectObject):
             pkg.addFloat32(update[2][2])
         for client in CLIENTS:
             self.cWriter.send(pkg, client)
-        print "Sent position updates to %d clients." % len(CLIENTS)
 
     def sendStatusUpdates(self, updates):
         pkg = PyDatagram()
