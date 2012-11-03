@@ -53,3 +53,11 @@ PLAYER_JUMP_NONE = 0
 PLAYER_JUMP_GATHER = 1
 PLAYER_JUMP_UNLEASH = 2
 PLAYER_JUMP_FINISH = 3
+
+##########################################################################################
+# positions ##############################################################################
+##########################################################################################
+POSITION_TOP_LEFT = 1
+POSITION_TOP_RIGHT = 2
+POSITION_BOTTOM_LEFT = 3
+POSITION_BOTTOM_RIGHT = 4

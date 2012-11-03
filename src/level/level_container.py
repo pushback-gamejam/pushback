@@ -3,7 +3,8 @@ from floor import Floor
 from ice import Ice
 from spikes import Spikes
 from wall import Wall
-
+from defines import *
+from panda3d.core import Point3
 
 TILE_SIZE = 4
 ARENA_CENTER_X = 0
@@ -92,6 +93,23 @@ class LevelContainer:
         #self.testIce = Ice()
         #self.testIce.render(parent,loader,0,0,50)
 
+    def getTileCenter(self,position):
+        if (position == POSITION_TOP_LEFT):
+            line = self.height - 1
+            column = 0
+        elif (position == POSITION_TOP_RIGHT):
+            line = self.height - 1
+            column = self.width - 1
+        elif (position == POSITION_BOTTOM_LEFT):
+            line = 0
+            column = 0
+        elif (position == POSITION_BOTTOM_RIGHT):
+            line = 0
+            column = self.width - 1
+
+        x = ARENA_CENTER_X - (column - float(self.width)/2)*TILE_SIZE
+        y = ARENA_CENTER_Y + (line - float(self.height)/2)*TILE_SIZE
+        return Point3(x,y,ARENA_CENTER_Z)
 
 
 #level = LevelContainer('test.ppm')
