@@ -1,9 +1,8 @@
-import direct.directbase.DirectStart
 from direct.actor.Actor import Actor
 
-PUSHY_PATH = "../resources/character/friday_2106/"
+PUSHY_PATH = "resources/character/friday_2106/"
 class Player(Actor):
-    def __init__(self):
+    def __init__(self, name):
         Actor.__init__(self,PUSHY_PATH+"pushy.x",
                         {"charge":PUSHY_PATH+"pushy_charge.x",
                         "charge_fly":PUSHY_PATH+"pushy_charge_fly.x",
@@ -17,6 +16,10 @@ class Player(Actor):
                         "standup":PUSHY_PATH+"pushy_standup.x",
                         "stop":PUSHY_PATH+"pushy_stop.x",
                         "walk":PUSHY_PATH+"pushy_walk.x"})
+        self.name = name
+        self.setName(name)
+
+        self.health = 1.0
         self.setScale(0.2)
         self.setPlayRate(0.05, "fall")
         self.setPlayRate(0.05, "charge_hit")
@@ -31,6 +34,8 @@ class Player(Actor):
         self.flyingTime = 0
         self.acFall=self.getAnimControl("fall")
         self.acStandup=self.getAnimControl("standup")
+
+        self.getGeomNode().setH(180)
         
         self.rotationSpeed = 300
         self.movementSpeed = 25
@@ -106,5 +111,14 @@ class Player(Actor):
                 self.acStandup.play()
             else:
                 self.isFalling = False
+
+    def setStatus(self, status):
+        """  """
+        if not self.status is status:
+            self.stopAnimation()
+        self.status = status
+        self.updateAnimation()
+
+
 
         
