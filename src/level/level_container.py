@@ -5,6 +5,11 @@ from spikes import Spikes
 from wall import Wall
 
 
+TILE_SIZE = 4
+ARENA_CENTER_X = 0
+ARENA_CENTER_Y = 0
+ARENA_CENTER_Z = 20
+
 class LevelContainer:
 
     def createTileObject(self, r, g, b, line, column):
@@ -73,8 +78,20 @@ class LevelContainer:
             line = line+1
             
     def render(self, parent, loader):
-        self.testIce = Ice()
-        self.testIce.render(parent,loader,0,0,50)
+
+        for column in range(self.width):
+            xPos = ARENA_CENTER_X - (column - float(self.width)/2)*TILE_SIZE
+
+            for line in range(self.height):
+                yPos = ARENA_CENTER_Y + (line - float(self.height)/2)*TILE_SIZE
+                self.tiles[line][column].render(parent,loader,xPos,yPos,ARENA_CENTER_Z)
+
+
+
+
+        #self.testIce = Ice()
+        #self.testIce.render(parent,loader,0,0,50)
+
 
 
 #level = LevelContainer('test.ppm')
