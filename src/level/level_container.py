@@ -71,9 +71,13 @@ class LevelContainer:
                 self.createTileObject(red, green, blue, line, column)
                 column = column+1
             line = line+1
+            
+    def render(self, parent, loader):
+        self.testIce = Ice()
+        self.testIce.render(parent,loader,0,0,50)
 
 
-level = LevelContainer('test.ppm')
+#level = LevelContainer('test.ppm')
 
 
 
