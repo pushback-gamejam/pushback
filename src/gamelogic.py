@@ -1,4 +1,4 @@
-from panda3d.core import CollisionTraverser, CollisionHandlerPusher, CollisionNode, CollisionSphere, NodePath, PandaNode, Point3
+from panda3d.core import CollisionTraverser, CollisionHandlerFloor, CollisionHandlerPusher, CollisionNode, CollisionSphere, CollisionRay, NodePath, PandaNode, Point3
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 
@@ -20,6 +20,9 @@ class GameLogic(DirectObject):
 
         self.level = LevelContainer("../resources/level/maps/test.ppm")
         
+        for y in range(0, self.level.height):
+            for x in range(0, self.level.width):
+                self.level.tiles[y][x]
         
         setups = []
         positions = [
@@ -36,24 +39,24 @@ class GameLogic(DirectObject):
     def addPlayer(self, name):
         self.players[name] = PlayerLogic(name)
         self.players[name].nodePath = self.nodePath.attachNewNode(PandaNode(name))
-        collisionNodePath = self.players[name].nodePath.attachNewNode(CollisionNode("collision"))
+        collisionNodePath = self.players[name].nodePath.attachNewNode(CollisionNode("pusherCollision"))
         collisionNodePath.node().addSolid(CollisionSphere(0, 0, 0, 1))
         pusher = CollisionHandlerPusher()
         pusher.addCollider(collisionNodePath, self.players[name].nodePath)
+        collisionNodePath = self.players[name].nodePath.attachNewNode(CollisionNode('floorCollision'))
+        collisionNodePath.node().addSolid(CollisionRay(0, 0, 0, 0, 0, -1))
+        lifter = CollisionHandlerFloor()
+        lifter.addCollider(collisionNodePath, self.players[name].nodePath)
         self.traverser.addCollider(collisionNodePath, pusher)
-        print "Player %s added." % name
 
     def setPlayerMovement(self, player, movement, status):
         self.players[player].setMovement(movement, status)
-        #print "Set player %s movement %d to %d." % (player, movement, self.players[player].movements[movement])
 
     def setPlayerCharge(self, player, status):
         self.players[player].setCharge(status)
-        #print "Set player %s charge status to %d." % (player, status)
 
     def setPlayerJump(self, player, status):
         self.players[player].setJump(status)
-        #print "Set player %s jump status to %d." % (player, status)
 
     def processLogic(self, task):
         positionUpdates = []
@@ -70,7 +73,6 @@ class GameLogic(DirectObject):
             self.traverser.traverse(self.nodePath)
 
             if player.positionChanged == 1:
-                #print "Player %s has updated position." % player.name
                 positionUpdates.append([player.name, player.nodePath.getPos(), player.direction])
                 player.positionChanged = 0
             if player.statusChanged == 1:

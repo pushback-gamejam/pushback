@@ -187,7 +187,7 @@ class Client(DirectObject):
         numberOfPlayers = data.getUint16()
         for i in range(0, numberOfPlayers):
             setup.append([data.getString(), Point3(data.getFloat32(), data.getFloat32(), data.getFloat32())])
-        self.gameOutput.start(self.name, setup)
+        # self.gameOutput.start(self.name, setup)
 
     def handleUpdatePositions(self, msgID, data):
         updates = []
@@ -199,8 +199,6 @@ class Client(DirectObject):
                 Point3(data.getFloat32(), data.getFloat32(), data.getFloat32()),
                 Vec3(data.getFloat32(), data.getFloat32(), data.getFloat32())])
         self.gameOutput.setPlayerPositions(updates)
-        #for update in updates:
-            #print "%s: (%f / %f / %f)" % (update[0], update[1][0], update[1][1], update[1][2])
 
     def handleUpdateStates(self, msgID, data):
         updates = []
@@ -213,7 +211,7 @@ class Client(DirectObject):
                 "health" : data.getFloat32(),
                 "charge" : data.getUint8(),
                 "jump" : data.getUint8()})
-        self.gameOutput.setPlayerStates(updates)
+        # self.gameOutput.setPlayerStates(updates)
         for update in updates:
             print "%s: %d, %.2f, %d, %d" % (update["player"], update["status"], update["health"], update["charge"], update["jump"])
 
