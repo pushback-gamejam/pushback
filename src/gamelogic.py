@@ -76,6 +76,18 @@ class GameLogic(DirectObject):
                 player.processJump()
 
             self.traverser.traverse(self.nodePath)
+            
+            for player2 in self.players.itervalues():
+                if player2 != player:
+                    dist = player.nodePath.getPos()-player2.nodePath.getPos()
+                    if dist.length() < 6:
+                        if player.chargeStatus == PLAYER_CHARGE_UNLEASH:
+                            player2.status = PLAYER_STATUS_FALLING
+                            player2.statusChanged = 1
+                        if player2.chargeStatus == PLAYER_CHARGE_UNLEASH:
+                            player.status = PLAYER_STATUS_FALLING
+                            player.statusChanged = 1
+                        
 
             if player.positionChanged == 1:
                 positionUpdates.append([player.name, player.nodePath.getPos(), player.nodePath.getHpr()])

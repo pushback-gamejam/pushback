@@ -72,7 +72,7 @@ class GameOutput(DirectObject):
         directionalLight.setSpecularColor(Vec4(1, 1, 1, 1))
         render.setLight(render.attachNewNode(ambientLight))
         render.setLight(render.attachNewNode(directionalLight))
-        skins = ["bonbon_green", "red", "pushette", "blue"]
+        skins = ["stony_green", "stony_red", "stony_blue", "bonbon_blue","bonbon_green", "red", "pushette", "blue"]
         for player in players:
             print "Init player %s" % player[0]
             p = Player(player[0])

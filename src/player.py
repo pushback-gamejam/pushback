@@ -75,6 +75,10 @@ class Player(Actor):
             if not self.acRunStart.isPlaying()  and not self.acRun.isPlaying():
                 #self.acRun.loop()
                 pass
+        elif self.status == PLAYER_STATUS_FALLING:
+            if not self.acRunStart.isPlaying()  and not self.acRun.isPlaying():
+                #self.acRun.loop()
+                pass
 
         
     def updateAnimation(self):
@@ -105,6 +109,11 @@ class Player(Actor):
             #self.acRunStart.play()
             #self.acRun.loop()
             self.loop("run")
+            #self.boringSound.play()
+        elif self.status == PLAYER_STATUS_FALLING:
+            #self.acRunStart.play()
+            #self.acRun.loop()
+            self.play("fall")
             #self.boringSound.play()
 
         
@@ -193,7 +202,7 @@ class Player(Actor):
             skin = "skin_pushy_stony_blue.jpg"
         elif color == "stony_green":
             skin = "skin_pushy_stony_green.jpg"
-        elif color == "stony_green":
+        elif color == "stony_red":
             skin = "skin_pushy_stony_red.jpg"
         myTexture = loader.loadTexture(PUSHY_SKIN_PATH + skin)
         self.setTexture(myTexture,1)
