@@ -1,8 +1,8 @@
 from tile_object import TileObject
+from tile_object import TILE_FOLDER
 
 ICE_TILE_FRICTION = 1
 
-TILE_FOLDER = "../resources/level/bausteine/"
 
 class Ice(TileObject):
     def __init__(self):
