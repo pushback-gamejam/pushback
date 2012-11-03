@@ -9,7 +9,7 @@ class Wall(TileObject):
         TileObject.__init__(self,0)
 
     def render(self, parent, loader, x, y, z):
-        self.model = loader.loadModel(TILE_FOLDER+"wall.x")
+        self.model = loader.loadModel(TILE_FOLDER+"wall_new2.x")
         self.model.reparentTo(parent)
         self.model.setPos(x,y,z)
 

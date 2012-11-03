@@ -8,6 +8,6 @@ class Spikes(TileObject):
         TileObject.__init__(self,SPIKES_TILE_FRICTION)
 
     def render(self, parent, loader, x, y, z):
-        self.model = loader.loadModel(TILE_FOLDER+"spiketree.x")
+        self.model = loader.loadModel(TILE_FOLDER+"spiketree_new.x")
         self.model.reparentTo(parent)
         self.model.setPos(x,y,z)

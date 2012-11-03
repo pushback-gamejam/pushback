@@ -9,7 +9,7 @@ class Ice(TileObject):
         TileObject.__init__(self,ICE_TILE_FRICTION)
         
     def render(self, parent, loader, x, y, z):
-        self.model = loader.loadModel(TILE_FOLDER+"icefield.x")
+        self.model = loader.loadModel(TILE_FOLDER+"icefield_new.x")
         self.model.reparentTo(parent)
         self.model.setPos(x,y,z)
         #self.model.setScale(10)

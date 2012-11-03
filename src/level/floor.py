@@ -8,7 +8,7 @@ class Floor(TileObject):
         TileObject.__init__(self,FLOOR_TILE_FRICTION)
 
     def render(self, parent, loader, x, y, z):
-        self.model = loader.loadModel(TILE_FOLDER+"default.x")
+        self.model = loader.loadModel(TILE_FOLDER+"bausteinnew2.x")
         self.model.reparentTo(parent)
         self.model.setPos(x,y,z)
 
