@@ -68,7 +68,8 @@ class World(DirectObject):
         # Create the main character, Ralph
         #self.ralph = addPlayer(0,0,0)
         ralphStartPos = self.environ.find("**/start_point").getPos()
-        self.ralph = Player()
+        self.ralph = Player("p1")
+        self.ralph.setColor("stony_red")
         self.ralph.reparentTo(render)
         
         self.lvlContainer = LevelContainer("../resources/level/test.ppm")

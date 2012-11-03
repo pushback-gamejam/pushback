@@ -6,6 +6,7 @@ loadPrcFileData("", "audio-library-name p3fmod_audio")
 
 PUSHY_PATH = "../resources/character/all/"
 PUSHY_AUDIO_PATH = "../resources/audio/effects/"
+PUSHY_SKIN_PATH = "../resources/character/skins/"
 class Player(Actor):
     def __init__(self, name):
         Actor.__init__(self,PUSHY_PATH+"pushy.x",
@@ -18,7 +19,7 @@ class Player(Actor):
                         "normal":PUSHY_PATH+"pushy_menu.x",
                         "fall":PUSHY_PATH+"pushy_fall.x",
                         "run":PUSHY_PATH+"pushy_run.x",
-                        "run_start":PUSHY_PATH+"pushy_walk.x",
+                        "run_start":PUSHY_PATH+"pushy_run.x",
                         "standup":PUSHY_PATH+"pushy_standup.x",
                         "stop":PUSHY_PATH+"pushy_stop.x",
                         "walk":PUSHY_PATH+"pushy_walk.x"})
@@ -58,7 +59,8 @@ class Player(Actor):
         
         #audio3d = Audio3DManager.Audio3DManager(base.sfxManagerList[0], camera)
         #mySound = audio3d.loadSfx('/audio/1.wav')
-        self.mySound = base.loader.loadSfx(PUSHY_AUDIO_PATH+"Game Jam - Action - Charging 04.ogg")
+        self.chargeSound = base.loader.loadSfx(PUSHY_AUDIO_PATH+"Game Jam - Action - Charging 04.ogg")
+        self.boringSound = base.loader.loadSfx(PUSHY_AUDIO_PATH+"Game Jam - Action - Boring 01.ogg")
         base.taskMgr.add(self.updateAnimTask, "update animation task")
 
     def updateAnimTask(self, task):
@@ -71,25 +73,35 @@ class Player(Actor):
                     self.acChargeFly.play()
         elif self.status == PLAYER_STATUS_MOVING:
             if not self.acRunStart.isPlaying()  and not self.acRun.isPlaying():
-                self.acRun.loop()
+                #self.acRun.loop()
+                pass
 
         
     def updateAnimation(self):
         if self.status == PLAYER_STATUS_NORMAL:
             self.loop("normal")
+
         elif self.status == PLAYER_STATUS_JUMPING:
             self.play("normal")
         elif self.status == PLAYER_STATUS_CHARGING:
             if self.subStatus  == PLAYER_CHARGE_GATHER:
-                self.mySound.play()
-                self.acChargeStart.play()
+                self.chargeSound.play()
+                #self.acChargeStart.play()
                 self.acCharge.play()
             elif self.subStatus  == PLAYER_CHARGE_UNLEASH:
-                self.mySound.setTime(1.975)
-                self.mySound.play()
+                self.chargeSound.setTime(1.975)
+                self.chargeSound.play()
                 self.acChargeRelease.play()
+                self.acCharge.play()
+            # TODO: this does not work correctly
+            else:
+                self.chargeSound.setTime(0)
+                self.chargeSound.play()
         elif self.status == PLAYER_STATUS_MOVING:
-            self.acRunStart.play()
+            #self.acRunStart.play()
+            #self.acRun.loop()
+            self.loop("run")
+            #self.boringSound.play()
 
         
     def rotateLeft(self):
@@ -138,8 +150,8 @@ class Player(Actor):
             self.isFlying = True
             #self.mySound.stop()
             #self.mySound = base.loader.loadSfx("4.ogg")
-            self.mySound.setTime(1.975)
-            self.mySound.play()
+            self.chargeSound.setTime(1.975)
+            self.chargeSound.play()
         if(self.isFlying == True):
             self.flyingTime = self.flyingTime-1
             self.setY(self, -self.movementSpeedFlying * globalClock.getDt())
@@ -165,6 +177,20 @@ class Player(Actor):
         skin = "skin_pushy_blue.jpg"
         if color == "green":
             skin = "skin_pushy_green.jpg"
+        elif color == "red":
+            skin = "skin_pushy_red.jpg"
+        elif color == "pushette":
+            skin = "skin_pushette.jpg"
+        elif color == "bonbon_blue":
+            skin = "skin_pushy_bonbon_blue.jpg"
+        elif color == "bonbon_green":
+            skin = "skin_pushy_bonbon_green.jpg"
+        elif color == "stony_blue":
+            skin = "skin_pushy_stony_blue.jpg"
+        elif color == "stony_green":
+            skin = "skin_pushy_stony_green.jpg"
+        elif color == "stony_green":
+            skin = "skin_pushy_stony_red.jpg"
         myTexture = loader.loadTexture(PUSHY_PATH + skin)
         self.setTexture(myTexture,1)
 
