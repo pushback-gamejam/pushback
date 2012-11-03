@@ -187,12 +187,11 @@ class Client(DirectObject):
         numberOfPlayers = data.getUint16()
         for i in range(0, numberOfPlayers):
             setup.append([data.getString(), Point3(data.getFloat32(), data.getFloat32(), data.getFloat32())])
-        # self.gameOutput.start(self.name, setup)
+        self.gameOutput.start(self.name, setup)
 
     def handleUpdatePositions(self, msgID, data):
         updates = []
         numberOfPlayers = data.getUint16()
-        #print "Received %d position updates from server." % numberOfPlayers
         for i in range(0, numberOfPlayers):
             updates.append([
                 data.getString(),
@@ -203,7 +202,6 @@ class Client(DirectObject):
     def handleUpdateStates(self, msgID, data):
         updates = []
         numberOfPlayers = data.getUint16()
-        #print "Received %d state updates from server." % numberOfPlayers
         for i in range(0, numberOfPlayers):
             updates.append({
                 "player" : data.getString(),
@@ -211,9 +209,8 @@ class Client(DirectObject):
                 "health" : data.getFloat32(),
                 "charge" : data.getUint8(),
                 "jump" : data.getUint8()})
-        # self.gameOutput.setPlayerStates(updates)
-        for update in updates:
-            print "%s: %d, %.2f, %d, %d" % (update["player"], update["status"], update["health"], update["charge"], update["jump"])
+        self.gameOutput.setPlayerStates(updates)
+
 
     ######################################################################################
 
