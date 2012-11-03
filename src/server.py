@@ -8,7 +8,8 @@ from direct.gui.DirectGui import *
 from direct.gui.OnscreenText import OnscreenText
 import sys
 
-import config
+from config import *
+from defines import *
 from gamelogic import GameLogic
 
 CLIENTS = {} 
@@ -23,12 +24,13 @@ class Server(DirectObject):
         self.cListener = QueuedConnectionListener(self.cManager, 0)
         self.cReader = QueuedConnectionReader(self.cManager, 0)
         self.cWriter = ConnectionWriter(self.cManager,0)
-        self.tcpSocket = self.cManager.openTCPServerRendezvous(config.SERVER_PORT, 1)
+        self.tcpSocket = self.cManager.openTCPServerRendezvous(SERVER_PORT, 1)
         self.cListener.addConnection(self.tcpSocket)
         taskMgr.add(self.listenTask, "serverListenTask", -40)
         taskMgr.add(self.readTask, "serverReadTask", -39)
 
         self.gameLogic = GameLogic()
+        self.gameLogic.delegate = self;
 
         blackmaker = CardMaker("blackmaker")
         blackmaker.setColor(0,0,0,1)
@@ -62,7 +64,7 @@ class Server(DirectObject):
     def readTask(self, task):
         while 1: 
             (datagram, data, msgID) = self.nonBlockingRead(self.cReader) 
-            if msgID is config.MSG_NONE: 
+            if msgID is MSG_NONE: 
                 break 
             else:
                 self.handleDatagram(data, msgID, datagram.getConnection()) 
@@ -78,11 +80,11 @@ class Server(DirectObject):
                 msgID = data.getUint16() 
             else: 
                 data = None 
-                msgID = config.MSG_NONE 
+                msgID = MSG_NONE 
         else: 
             datagram = None 
             data = None 
-            msgID = config.MSG_NONE 
+            msgID = MSG_NONE 
         return (datagram, data, msgID)
 
     ######################################################################################
@@ -103,8 +105,9 @@ class Server(DirectObject):
     def msgAuth(self, msgID, data, client):
         name = data.getString()
         CLIENTS[client] = name
+        self.gameLogic.addPlayer(name)
         pkg = PyDatagram()
-        pkg.addUint16(config.SV_MSG_AUTH_RESPONSE)
+        pkg.addUint16(SV_MSG_AUTH_RESPONSE)
         self.cWriter.send(pkg, client)
         self.screenText.appendText("Registered new client: ")
         self.screenText.appendText(name)
@@ -120,7 +123,7 @@ class Server(DirectObject):
         self.screenText.appendText(message)
         self.screenText.appendText("\n")
         pkg = PyDatagram()
-        pkg.addUint16(config.SV_MSG_CHAT)
+        pkg.addUint16(SV_MSG_CHAT)
         pkg.addString(message)
         for receiverClient in CLIENTS:
             self.cWriter.send(pkg, receiverClient)
@@ -129,7 +132,7 @@ class Server(DirectObject):
 
     def msgDisconnectReq(self, msgID, data, client): 
         pkg = PyDatagram() 
-        pkg.addUint16(config.SV_MSG_DISCONNECT_ACK) 
+        pkg.addUint16(SV_MSG_DISCONNECT_ACK) 
         self.cWriter.send(pkg, client) 
         del CLIENTS[client]
         self.cReader.removeConnection(client)
@@ -142,59 +145,74 @@ class Server(DirectObject):
         self.screenText.appendText(" pushies will fight to death.")
         self.gameLogic.start()
         pkg = PyDatagram()
-        pkg.addUint16(config.SV_MSG_START_GAME)
+        pkg.addUint16(SV_MSG_START_GAME)
         pkg.addUint16(len(CLIENTS))
+        # ...
         for receiverClient in CLIENTS:    
             self.cWriter.send(pkg, receiverClient)
 
     ######################################################################################
 
-    def handlePerformWalk(self, msgID, data, client):
+    def handleMovementCommand(self, msgID, data, client):
         player = CLIENTS[client]
-        direction = data.getUInt8()
+        movement = data.getUint8()
+        state = data.getUint8()
+        self.gameLogic.setPlayerMovement(player, movement, state)
 
-    def handlePerformClout(self, msgID, data, client):
+    def handleJumpCommand(self, msgID, data, client):
         player = CLIENTS[client]
+        state = data.getUint8()
+        self.gameLogic.setPlayerJump(player, state)
 
-    def handlePerformJump(self, msgID, data, client):
+    def handleChargeCommand(self, msgID, data, client):
         player = CLIENTS[client]
-
-    def handlePerformCharge(self, msgID, data, client):
-        player = CLIENTS[client]
+        state = data.getUint8()
+        self.gameLogic.setPlayerCharge(player, state)
 
     ######################################################################################
 
-    def handleCompleteWalk(self, msgID, data, client):
-        player = CLIENTS[client]
+    def sendPositionUpdates(self, updates):
+        pkg = PyDatagram()
+        pkg.addUint16(SV_MSG_UPDATE_POSITIONS)
+        pkg.addUint16(len(updates))
+        for update in updates:
+            pkg.addString(update[0])
+            pkg.addFloat32(update[1][0])
+            pkg.addFloat32(update[1][1])
+            pkg.addFloat32(update[1][2])
+            pkg.addFloat32(update[2][0])
+            pkg.addFloat32(update[2][1])
+            pkg.addFloat32(update[2][2])
+        for client in CLIENTS:
+            self.cWriter.send(pkg, client)
 
-    def handleCompleteJump(self, msgID, data, client):
-        player = CLIENTS[client]
-
-    def handleCompleteCharge(self, msgID, data, client):
-        player = CLIENTS[client]
-
-    ######################################################################################
+    def sendStateUpdates(self, updates):
+        pkg = PyDatagram()
+        pkg.addUint16(SV_MSG_UPDATE_STATES)
+        pkg.addUint16(len(updates))
+        for update in updates:
+            pkg.addString(update["player"])
+            pkg.addUint8(update["status"])
+            pkg.addFloat32(update["health"])
+            pkg.addUint8(update["charge"])
+            pkg.addUint8(update["jump"])
+        for client in CLIENTS:
+            self.cWriter.send(pkg, client)
 
     def quit(self): 
         self.cManager.closeConnection(self.tcpSocket) 
         sys.exit() 
 
-# create a server object on port 9099 
 server = Server() 
 
-#install msg handlers 
 Handlers = { 
-    config.CL_MSG_AUTH              : server.msgAuth, 
-    config.CL_MSG_CHAT              : server.msgChat, 
-    config.CL_MSG_DISCONNECT_REQ    : server.msgDisconnectReq,
-    config.CL_MSG_COMPLETE_SETUP    : server.handleCompleteSetup,
-    config.CL_MSG_PERFORM_WALK      : server.handlePerformWalk,
-    config.CL_MSG_PERFORM_CLOUT     : server.handlePerformClout,
-    config.CL_MSG_PERFORM_JUMP      : server.handlePerformJump,
-    config.CL_MSG_PERFORM_CHARGE    : server.handlePerformCharge,
-    config.CL_MSG_COMPLETE_WALK     : server.handleCompleteWalk,
-    config.CL_MSG_COMPLETE_JUMP     : server.handleCompleteJump,
-    config.CL_MSG_COMPLETE_CHARGE   : server.handleCompleteCharge
+    CL_MSG_AUTH              : server.msgAuth, 
+    CL_MSG_CHAT              : server.msgChat, 
+    CL_MSG_DISCONNECT_REQ    : server.msgDisconnectReq,
+    CL_MSG_COMPLETE_SETUP    : server.handleCompleteSetup,
+    CL_MSG_MOVEMENT_COMMAND  : server.handleMovementCommand,
+    CL_MSG_JUMP_COMMAND      : server.handleJumpCommand,
+    CL_MSG_CHARGE_COMMAND    : server.handleChargeCommand
     } 
 
 run()
