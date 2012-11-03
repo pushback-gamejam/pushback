@@ -13,6 +13,10 @@ class GameLogic(DirectObject):
 
     def start(self):
         taskMgr.add(self.processMovements, "movementsTask")
+        setups = []
+        for player in self.players.itervalues():
+            setups.append({"player": player.name, "position": player.position})
+        return setups
 
     def addPlayer(self, name):
         self.players[name] = PlayerLogic(name)
@@ -20,39 +24,44 @@ class GameLogic(DirectObject):
 
     def setPlayerMovement(self, player, movement, status):
         self.players[player].setMovement(movement, status)
-        print "Set player %s movement %d to %d." % (player, movement, status)
+        print "Set player %s movement %d to %d." % (player, movement, self.players[player].movements[movement])
 
     def setPlayerCharge(self, player, status):
         self.players[player].setCharge(status)
-        print "Set player %s charge state to %d." % (player, status)
+        print "Set player %s charge status to %d." % (player, status)
 
     def setPlayerJump(self, player, status):
         self.players[player].setJump(status)
-        print "Set player %s jump state to %d." % (player, status)
+        print "Set player %s jump status to %d." % (player, status)
 
     def processMovements(self, task):
-        # movement logic / collision detection
-        
-        
-        
+
         positionUpdates = []
-        stateUpdates = []
+        statusUpdates = []
         for player in self.players.itervalues():
-            player.processMovement()
-            player.processCharge()
+
+            if player.status == PLAYER_STATUS_MOVING:
+                print "Player %s is moving." % player.name
+                player.processMovement()
+            elif player.status == PLAYER_STATUS_CHARGING:
+                player.processCharge()
+            elif player.status == PLAYER_STATUS_JUMPING:
+                player.processJump()
+
             if player.positionChanged == 1:
+                print "Player %s has updated position." % player.name
                 positionUpdates.append([player.name, player.position, player.direction])
                 player.positionChanged = 0
-            if player.stateChanged == 1:
-                stateUpdates.append({
+            if player.statusChanged == 1:
+                statusUpdates.append({
                     "player" : player.name,
                     "status" : player.status,
                     "health" : player.health,
-                    "charge" : player.chargeState,
-                    "jump" : player.jumpState})
+                    "charge" : player.chargeStatus,
+                    "jump" : player.jumpStatus})
                 player.statusChanged = 0
         if len(positionUpdates) > 0:
             self.delegate.sendPositionUpdates(positionUpdates)
-        if len(stateUpdates) > 0:
-            self.delegate.sendStateUpdates(stateUpdates)
+        if len(statusUpdates) > 0:
+            self.delegate.sendStatusUpdates(statusUpdates)
         return task.cont;
