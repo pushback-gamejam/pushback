@@ -14,6 +14,7 @@ class GameLogic(DirectObject):
         self.players = {}
         self.nodePath = NodePath(PandaNode("root"))
         self.traverser = CollisionTraverser()
+        
 
     def start(self):
         taskMgr.add(self.processLogic, "logicTask")
@@ -39,15 +40,19 @@ class GameLogic(DirectObject):
     def addPlayer(self, name):
         self.players[name] = PlayerLogic(name)
         self.players[name].nodePath = self.nodePath.attachNewNode(PandaNode(name))
+        
         collisionNodePath = self.players[name].nodePath.attachNewNode(CollisionNode("pusherCollision"))
         collisionNodePath.node().addSolid(CollisionSphere(0, 0, 0, 1))
         pusher = CollisionHandlerPusher()
         pusher.addCollider(collisionNodePath, self.players[name].nodePath)
-        collisionNodePath = self.players[name].nodePath.attachNewNode(CollisionNode('floorCollision'))
-        collisionNodePath.node().addSolid(CollisionRay(0, 0, 0, 0, 0, -1))
-        lifter = CollisionHandlerFloor()
-        lifter.addCollider(collisionNodePath, self.players[name].nodePath)
         self.traverser.addCollider(collisionNodePath, pusher)
+        
+        #collisionNodePath = self.players[name].nodePath.attachNewNode(CollisionNode('floorCollision'))
+        #collisionNodePath.node().addSolid(CollisionRay(0, 0, -10, 0, 0, -1))
+        #lifter = CollisionHandlerFloor()
+        #lifter.addCollider(collisionNodePath, self.players[name].nodePath)
+        #lifter.setOffset(2)
+        #self.traverser.addCollider(collisionNodePath, lifter)
 
     def setPlayerMovement(self, player, movement, status):
         self.players[player].setMovement(movement, status)
@@ -73,7 +78,7 @@ class GameLogic(DirectObject):
             self.traverser.traverse(self.nodePath)
 
             if player.positionChanged == 1:
-                positionUpdates.append([player.name, player.nodePath.getPos(), player.direction])
+                positionUpdates.append([player.name, player.nodePath.getPos(), player.nodePath.getHpr()])
                 player.positionChanged = 0
             if player.statusChanged == 1:
                 statusUpdates.append({

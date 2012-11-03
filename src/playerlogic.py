@@ -3,7 +3,9 @@ from direct.showbase.DirectObject import DirectObject
 
 from defines import *
 
-SPEED = 3
+SPEED = 5
+TURN_SPEED = 300
+CHARGE_SPEED = 20
 
 class PlayerLogic(DirectObject):
 
@@ -20,8 +22,8 @@ class PlayerLogic(DirectObject):
         self.jumpProgress = 0.0
         self.jumpStatus = PLAYER_JUMP_NONE
 
-        self.direction = Vec3(0, 0, 0)
-        self.position = Point3(0, 0, 0)
+        #self.direction = Vec3(0, 0, 0)
+        #self.position = Point3(0, 0, 0)
         self.positionChanged = 0
 
         self.movements = {
@@ -60,18 +62,23 @@ class PlayerLogic(DirectObject):
 
     def processMovement(self):
         if self.movements[PLAYER_MOVEMENT_RIGHT] == 1:
-            self.position[0] += SPEED * globalClock.getDt()
+            #.position[0] += SPEED * globalClock.getDt()
+            self.nodePath.setH(self.nodePath, -TURN_SPEED  * globalClock.getDt())
             self.positionChanged = 1
         if self.movements[PLAYER_MOVEMENT_LEFT] == 1:
-            self.position[0] -= SPEED * globalClock.getDt()
+            #self.position[0] -= SPEED * globalClock.getDt()
+            self.nodePath.setH(self.nodePath, TURN_SPEED  * globalClock.getDt())
             self.positionChanged = 1
         if self.movements[PLAYER_MOVEMENT_UP] == 1:
-            self.position[1] += SPEED * globalClock.getDt()
+            #self.position[1] += SPEED * globalClock.getDt()
+            self.nodePath.setY(self.nodePath, SPEED * globalClock.getDt())
             self.positionChanged = 1
         if self.movements[PLAYER_MOVEMENT_DOWN] == 1:
-            self.position[1] -= SPEED * globalClock.getDt()
-            self.positionChanged = 1
-        self.nodePath.setPos(self.position)
+            #self.position[1] -= SPEED * globalClock.getDt()
+            #self.nodePath.setY(self.nodePath, -SPEED * globalClock.getDt())
+            #self.positionChanged = 1
+            pass
+        #self.nodePath.setPos(self.position)
 
     def processCharge(self):
         if self.chargeStatus == PLAYER_CHARGE_GATHER:
@@ -81,6 +88,8 @@ class PlayerLogic(DirectObject):
                 self.statusChanged = 1
         elif self.chargeStatus == PLAYER_CHARGE_UNLEASH:
             self.chargeProgress -= 0.01
+            self.nodePath.setY(self.nodePath, CHARGE_SPEED * globalClock.getDt())
+            self.positionChanged = 1
             if self.chargeProgress < 0.01:
                 self.chargeStatus = PLAYER_CHARGE_MISS
                 self.statusChanged = 1

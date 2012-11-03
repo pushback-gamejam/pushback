@@ -26,7 +26,7 @@ class Player(Actor):
         self.name = name
         self.setName(name)
         self.health = 1.0
-        self.setScale(0.2)
+        self.setScale(0.4)
         self.setPlayRate(0.05, "fall")
         self.setPlayRate(0.05, "charge_hit")
         self.setPlayRate(0.05, "charge_miss")
@@ -46,7 +46,7 @@ class Player(Actor):
         self.acRunStart=self.getAnimControl("run_start")
         self.acRun=self.getAnimControl("run")
         # blender rotation fix
-        self.getGeomNode().setH(180)
+        self.find("**/+GeomNode").setH(180)
         
         self.rotationSpeed = 300
         self.movementSpeed = 25
@@ -91,12 +91,16 @@ class Player(Actor):
             elif self.subStatus  == PLAYER_CHARGE_UNLEASH:
                 self.chargeSound.setTime(1.975)
                 self.chargeSound.play()
-                self.acChargeRelease.play()
-                self.acCharge.play()
+                #self.acChargeRelease.play()
+                #self.acCharge.play()
+                self.loop("charge_fly")
+            elif self.subStatus  == PLAYER_CHARGE_MISS:
+                self.play("charge_miss")
             # TODO: this does not work correctly
             else:
                 self.chargeSound.setTime(0)
                 self.chargeSound.play()
+                self.loop("charge")
         elif self.status == PLAYER_STATUS_MOVING:
             #self.acRunStart.play()
             #self.acRun.loop()
@@ -191,7 +195,7 @@ class Player(Actor):
             skin = "skin_pushy_stony_green.jpg"
         elif color == "stony_green":
             skin = "skin_pushy_stony_red.jpg"
-        myTexture = loader.loadTexture(PUSHY_PATH + skin)
+        myTexture = loader.loadTexture(PUSHY_SKIN_PATH + skin)
         self.setTexture(myTexture,1)
 
     def stopAnimation(self):
@@ -202,6 +206,8 @@ class Player(Actor):
         """  """
         animationChanged = False
         if not self.status == status:
+            if status == PLAYER_STATUS_CHARGING:
+                self.subStatus = PLAYER_CHARGE_GATHER
             self.stopAnimation()
             self.status = status
             animationChanged = True
@@ -211,7 +217,7 @@ class Player(Actor):
                     self.stopAnimation()
                     self.subStatus = jumpSubStatus
                     animationChanged = True
-            elif status == PLAYER_STATUS_CHARGING:
+            elif status == PLAYER_STATUS_CHARGING:             
                 if not chargeSubStatus == self.subStatus:
                     self.stopAnimation()
                     self.subStatus = chargeSubStatus

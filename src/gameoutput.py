@@ -13,6 +13,12 @@ import random, sys, os, math
 from player import Player
 import defines
 from level.level_container import LevelContainer
+from pandac.PandaModules import *
+
+# This is just to ensure that we are using FMOD. In your application,
+# please edit the Config.prc file that you distribute
+from panda3d.core import loadPrcFileData
+loadPrcFileData("", "audio-library-name p3fmod_audio")
 
 CAM_HEIGHT = 50
 CAM_ANGLE = 45
@@ -28,6 +34,9 @@ class GameOutput(DirectObject):
         DirectObject.__init__(self)
         self.showBase = showBase
         self.levelName = level
+        mySound = base.loader.loadSfx("../resources/audio/Game Jam - Stefan Putzinger - Theme 02.wav")
+        mySound.setVolume(0.5)
+        mySound.play()
 
     def start(self, myPlayerName, players):
         """
@@ -38,6 +47,7 @@ class GameOutput(DirectObject):
         self.levelNode = render.attachNewNode("Level node")
         self.level = LevelContainer(self.levelName)
         self.level.render(self.levelNode, base.loader)
+        self.levelNode.setAttrib(ShadeModelAttrib.make(ShadeModelAttrib.MFlat))
 
         base.win.setClearColor(Vec4(0,0,0,1))
         self.title = addTitle("PushBack")
@@ -62,11 +72,13 @@ class GameOutput(DirectObject):
         directionalLight.setSpecularColor(Vec4(1, 1, 1, 1))
         render.setLight(render.attachNewNode(ambientLight))
         render.setLight(render.attachNewNode(directionalLight))
+        skins = ["bonbon_green", "red", "pushette", "blue"]
         for player in players:
             print "Init player %s" % player[0]
             p = Player(player[0])
             p.reparentTo(self.playersNode)
             p.setPos(player[1])
+            p.setColor(skins.pop())
             self.players[player[0]] = p
             if myPlayerName == player[0]:
                 self.myPlayer = p
