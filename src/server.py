@@ -143,11 +143,16 @@ class Server(DirectObject):
         self.screenText.appendText("A new game will start... ")
         self.screenText.appendText(str(len(CLIENTS)))
         self.screenText.appendText(" pushies will fight to death.")
-        self.gameLogic.start()
+        setups = self.gameLogic.start()
+        numberOfPlayers = len(setups)
         pkg = PyDatagram()
         pkg.addUint16(SV_MSG_START_GAME)
-        pkg.addUint16(len(CLIENTS))
-        # ...
+        pkg.addUint16(numberOfPlayers)
+        for setup in setups:
+            pkg.addString(setup["player"])
+            pkg.addFloat32(setup["position"][0])
+            pkg.addFloat32(setup["position"][1])
+            pkg.addFloat32(setup["position"][2])
         for receiverClient in CLIENTS:    
             self.cWriter.send(pkg, receiverClient)
 
@@ -156,18 +161,18 @@ class Server(DirectObject):
     def handleMovementCommand(self, msgID, data, client):
         player = CLIENTS[client]
         movement = data.getUint8()
-        state = data.getUint8()
-        self.gameLogic.setPlayerMovement(player, movement, state)
+        status = data.getUint8()
+        self.gameLogic.setPlayerMovement(player, movement, status)
 
     def handleJumpCommand(self, msgID, data, client):
         player = CLIENTS[client]
-        state = data.getUint8()
-        self.gameLogic.setPlayerJump(player, state)
+        status = data.getUint8()
+        self.gameLogic.setPlayerJump(player, status)
 
     def handleChargeCommand(self, msgID, data, client):
         player = CLIENTS[client]
-        state = data.getUint8()
-        self.gameLogic.setPlayerCharge(player, state)
+        status = data.getUint8()
+        self.gameLogic.setPlayerCharge(player, status)
 
     ######################################################################################
 
@@ -185,8 +190,9 @@ class Server(DirectObject):
             pkg.addFloat32(update[2][2])
         for client in CLIENTS:
             self.cWriter.send(pkg, client)
+        print "Sent position updates to %d clients." % len(CLIENTS)
 
-    def sendStateUpdates(self, updates):
+    def sendStatusUpdates(self, updates):
         pkg = PyDatagram()
         pkg.addUint16(SV_MSG_UPDATE_STATES)
         pkg.addUint16(len(updates))
