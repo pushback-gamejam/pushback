@@ -76,7 +76,6 @@ class Player(Actor):
         
     def updateAnimation(self):
         if self.status == PLAYER_STATUS_NORMAL:
-            print "normla"
             self.loop("normal")
         elif self.status == PLAYER_STATUS_JUMPING:
             self.play("normal")

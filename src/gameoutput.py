@@ -12,6 +12,7 @@ from direct.showbase import Audio3DManager
 import random, sys, os, math
 from player import Player
 import defines
+from level.level_container import LevelContainer
 
 CAM_HEIGHT = 50
 CAM_ANGLE = 45
@@ -34,10 +35,10 @@ class GameOutput(DirectObject):
         initializes the players and sets up the scene
         """
         # Load the environment model.
-        self.environ = loader.loadModel(self.levelName)
-        self.environ.reparentTo(render)
-        #self.environ.setScale(0.25, 0.25, 0.25)
-        #self.environ.setPos(-8, 42, 0)
+        self.levelNode = render.attachNewNode("Level node")
+        self.level = LevelContainer(self.levelName)
+        self.level.render(self.levelNode, base.loader)
+
         base.win.setClearColor(Vec4(0,0,0,1))
         self.title = addTitle("PushBack")
         self.players = dict()

@@ -11,10 +11,13 @@ from config import *
 from defines import *
 from gameoutput import GameOutput
 
+from panda3d.core import loadPrcFile
+
 class Client(DirectObject):
 
     def __init__(self):
         DirectObject.__init__(self)
+        loadPrcFile("Config.prc")
         self.showBase = ShowBase()
         self.accept("escape", self.sendMsgDisconnectReq)
         self.cManager = QueuedConnectionManager()
@@ -26,7 +29,7 @@ class Client(DirectObject):
         self.showBase.taskMgr.add(self.readTask, "serverReaderPollTask", -39)
 
         self.uiNode = aspect2d.attachNewNode("UI Node")
-        self.gameOutput = GameOutput("../resources/level/testlevel_new.x", self.showBase)
+        self.gameOutput = GameOutput("../resources/level/maps/test.ppm", self.showBase)
 
         def connect():
             self.name = self.nameEntry.get()
@@ -189,20 +192,20 @@ class Client(DirectObject):
     def handleUpdatePositions(self, msgID, data):
         updates = []
         numberOfPlayers = data.getUint16()
-        print "Received %d position updates from server." % numberOfPlayers
+        #print "Received %d position updates from server." % numberOfPlayers
         for i in range(0, numberOfPlayers):
             updates.append([
                 data.getString(),
                 Point3(data.getFloat32(), data.getFloat32(), data.getFloat32()),
                 Vec3(data.getFloat32(), data.getFloat32(), data.getFloat32())])
         self.gameOutput.setPlayerPositions(updates)
-        for update in updates:
-            print "%s: (%f / %f / %f)" % (update[0], update[1][0], update[1][1], update[1][2])
+        #for update in updates:
+            #print "%s: (%f / %f / %f)" % (update[0], update[1][0], update[1][1], update[1][2])
 
     def handleUpdateStates(self, msgID, data):
         updates = []
         numberOfPlayers = data.getUint16()
-        print "Received %d state updates from server." % numberOfPlayers
+        #print "Received %d state updates from server." % numberOfPlayers
         for i in range(0, numberOfPlayers):
             updates.append({
                 "player" : data.getString(),

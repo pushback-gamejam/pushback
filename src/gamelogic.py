@@ -18,7 +18,7 @@ class GameLogic(DirectObject):
     def start(self):
         taskMgr.add(self.processLogic, "logicTask")
 
-        self.level = LevelContainer("../resources/level/test.ppm")
+        self.level = LevelContainer("../resources/level/maps/test.ppm")
         
         
         setups = []
@@ -45,15 +45,15 @@ class GameLogic(DirectObject):
 
     def setPlayerMovement(self, player, movement, status):
         self.players[player].setMovement(movement, status)
-        print "Set player %s movement %d to %d." % (player, movement, self.players[player].movements[movement])
+        #print "Set player %s movement %d to %d." % (player, movement, self.players[player].movements[movement])
 
     def setPlayerCharge(self, player, status):
         self.players[player].setCharge(status)
-        print "Set player %s charge status to %d." % (player, status)
+        #print "Set player %s charge status to %d." % (player, status)
 
     def setPlayerJump(self, player, status):
         self.players[player].setJump(status)
-        print "Set player %s jump status to %d." % (player, status)
+        #print "Set player %s jump status to %d." % (player, status)
 
     def processLogic(self, task):
         positionUpdates = []
@@ -70,7 +70,7 @@ class GameLogic(DirectObject):
             self.traverser.traverse(self.nodePath)
 
             if player.positionChanged == 1:
-                print "Player %s has updated position." % player.name
+                #print "Player %s has updated position." % player.name
                 positionUpdates.append([player.name, player.nodePath.getPos(), player.direction])
                 player.positionChanged = 0
             if player.statusChanged == 1:

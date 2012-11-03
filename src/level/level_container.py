@@ -9,7 +9,7 @@ from panda3d.core import Point3
 TILE_SIZE = 4
 ARENA_CENTER_X = 0
 ARENA_CENTER_Y = 0
-ARENA_CENTER_Z = 20
+ARENA_CENTER_Z = -20
 
 class LevelContainer:
 
@@ -32,9 +32,6 @@ class LevelContainer:
         #invalid color
         else:
             print 'Invalid Color Value detected!'
-
-
-
 
 # Init method that loads level file
     def __init__(self, levelFile):
