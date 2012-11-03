@@ -3,11 +3,14 @@ from direct.showbase.DirectObject import DirectObject
 
 from defines import *
 
+SPEED = 3
+
 class PlayerLogic(DirectObject):
 
     def __init__(self, name):
         DirectObject.__init__(self)
         self.name = name
+        self.nodePath = None
 
         self.status = PLAYER_STATUS_NORMAL;
         self.statusChanged = 0
@@ -57,17 +60,18 @@ class PlayerLogic(DirectObject):
 
     def processMovement(self):
         if self.movements[PLAYER_MOVEMENT_RIGHT] == 1:
-            self.position[0] += 25 * globalClock.getDt()
+            self.position[0] += SPEED * globalClock.getDt()
             self.positionChanged = 1
         if self.movements[PLAYER_MOVEMENT_LEFT] == 1:
-            self.position[0] -= 25 * globalClock.getDt()
+            self.position[0] -= SPEED * globalClock.getDt()
             self.positionChanged = 1
         if self.movements[PLAYER_MOVEMENT_UP] == 1:
-            self.position[1] += 25 * globalClock.getDt()
+            self.position[1] += SPEED * globalClock.getDt()
             self.positionChanged = 1
         if self.movements[PLAYER_MOVEMENT_DOWN] == 1:
-            self.position[1] -= 25 * globalClock.getDt()
+            self.position[1] -= SPEED * globalClock.getDt()
             self.positionChanged = 1
+        self.nodePath.setPos(self.position)
 
     def processCharge(self):
         if self.chargeStatus == PLAYER_CHARGE_GATHER:
@@ -78,12 +82,11 @@ class PlayerLogic(DirectObject):
         elif self.chargeStatus == PLAYER_CHARGE_UNLEASH:
             self.chargeProgress -= 0.01
             if self.chargeProgress < 0.01:
-                self.chargeStatus = PLAYER_CHARGE_FINISH
+                self.chargeStatus = PLAYER_CHARGE_MISS
                 self.statusChanged = 1
-        elif self.chargeStatus == PLAYER_CHARGE_FINISH:
-            self.status = PLAYER_STATUS_NORMAL
+        elif self.chargeStatus == PLAYER_CHARGE_MISS:
+            self.setStatus(PLAYER_STATUS_NORMAL)
             self.chargeStatus = PLAYER_CHARGE_NONE
-            self.statusChanged = 1
 
     def processJump(self):
         pass
